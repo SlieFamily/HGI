@@ -23,7 +23,7 @@ class POIEncoder(nn.Module):
 
 
 class POI2Region(nn.Module):
-    """POI - region aggregation and GCN at regional level"""
+    """POI-region aggregation and GCN at regional level"""
     def __init__(self, hidden_channels, num_heads):
         super(POI2Region, self).__init__()
         self.PMA = PMA(dim=hidden_channels, num_heads=num_heads, num_seeds=1, ln=False)
@@ -31,7 +31,7 @@ class POI2Region(nn.Module):
         self.prelu = nn.PReLU(hidden_channels)
 
     def forward(self, x, zone, region_adjacency):
-        region_emb = x.new_zeros((zone.max()+1, x.size()[1]))
+        region_emb = x.new_zeros((zone.max()+1, x.size()[1])) #x.size([1])是图节点数
         for index in range(zone.max() + 1):
             poi_index_in_region = (zone == index).nonzero(as_tuple=True)[0]
             region_emb[index] = self.PMA(x[poi_index_in_region].unsqueeze(0)).squeeze()
@@ -41,7 +41,7 @@ class POI2Region(nn.Module):
 
 
 def corruption(x):
-    """corruption function to generate negative POIs through random permuting POI initial features"""
+    """破坏函数(corruption function): 通过随机排布初始POI特征来生成POIs负样本"""
     return x[torch.randperm(x.size(0))]
 
 
@@ -72,10 +72,13 @@ class HierarchicalGraphInfomax(torch.nn.Module):
         pos_poi_emb = self.poi_encoder(data.x, data.edge_index, data.edge_weight)
         cor_x = self.corruption(data.x)
         neg_poi_emb = self.poi_encoder(cor_x, data.edge_index, data.edge_weight)
+
         region_emb = self.poi2region(pos_poi_emb, data.region_id, data.region_adjacency)
         self.region_embedding = region_emb
         neg_region_emb = self.poi2region(neg_poi_emb, data.region_id, data.region_adjacency)
+
         city_emb = self.region2city(region_emb, data.region_area)
+
         pos_poi_emb_list = []
         neg_poi_emb_list = []
         """hard negative sampling procedure"""
@@ -91,6 +94,7 @@ class HierarchicalGraphInfomax(torch.nn.Module):
                     another_region_id = random.sample((set(data.region_id.tolist()) - set([region])), 1)[0]
             else:
                 another_region_id = random.sample((set(data.region_id.tolist())-set([region])), 1)[0]
+                
             id_of_poi_in_another_region = (data.region_id == another_region_id).nonzero(as_tuple=True)[0]
             poi_emb_of_another_region = pos_poi_emb[id_of_poi_in_another_region]
             pos_poi_emb_list.append(poi_emb_of_a_region)

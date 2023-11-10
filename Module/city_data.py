@@ -5,8 +5,7 @@ import os
 
 
 def hgi_graph(city_name='shenzhen'):
-    """the function hgi_graph() returns a Data object of the city graph.
-    Note that the data file should be put under the directory ./Data/"""
+    """函数 hgi_graph() 从特定文件夹中读取数据集并返回一个city graph的数据对象."""
     city_dict_file = f'./Data/{city_name}_data.pkl'
     if city_name == "shenzhen" and not os.path.exists(city_dict_file):
         print("Please download data for Shenzhen from https://figshare.com/articles/dataset/Sub-sampled_dataset_for_Shenzhen_HGI_region_embedding_example_dataset_/21836496")

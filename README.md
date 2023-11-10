@@ -72,7 +72,9 @@ python train.py --city shenzhen
 
 - `xiamen`: 中国厦门 | Xiamen Island, China
 - `shenzhen`: 中国深圳 | Shenzhen, China
-和三种下游任务：
+
+支持三种下游任务：
+
 - `uf`: urban function inference (this repo contains mocked ground truth data, the real ground truth data can be requested from [here](http://geoscape.pku.edu.cn/en.html))
 - `pd`: population density estimation
 - `hp`: housing price estimation

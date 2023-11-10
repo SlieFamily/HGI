@@ -50,7 +50,7 @@ class SAB(nn.Module):
 
 
 class PMA(nn.Module):
-    """the aggregation from POIs to regions function based on multi-head attention mechanisms"""
+    """基于多头注意力机制的 POIs->regions 聚合"""
     def __init__(self, dim, num_heads, num_seeds, ln=False):
         super(PMA, self).__init__()
         self.S = nn.Parameter(torch.Tensor(1, num_seeds, dim))

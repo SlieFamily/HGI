@@ -6,13 +6,14 @@
 @author: Weiming Huang, Daokun Zhang, Gengchen Mai
 @contact: weiming.huang@ntu.edu.sg
 """
-import argparse
-from Module.city_data import hgi_graph
-from torch.optim.lr_scheduler import StepLR
-from torch.nn.utils import clip_grad_norm_
+
+import argparse # 接收控制台参数
+from Module.city_data import hgi_graph #HGI主模型
+from torch.optim.lr_scheduler import StepLR #等间隔学习率优化
+from torch.nn.utils import clip_grad_norm_ #梯度裁剪
 from Module.hgi_module import *
-from tqdm import trange
-import pytorch_warmup as warmup
+from tqdm import trange #进度条
+import pytorch_warmup as warmup #预热学习率
 import math
 import os
 
@@ -39,9 +40,11 @@ if __name__ == '__main__':
     dname = os.path.dirname(abspath)
     os.chdir(dname)
     args = parse_args()
-    """load the graph data of a study area"""
+
+    """从指定城市数据集中加载图结构数据，并指定训练是CPU还是GPU"""
     data = hgi_graph(args.city).to(args.device)
-    """load the Module"""
+
+    """加载模型"""
     model = HierarchicalGraphInfomax(
         hidden_channels=args.dim,
         poi_encoder=POIEncoder(data.num_features, args.dim),
@@ -50,7 +53,8 @@ if __name__ == '__main__':
         corruption=corruption,
         alpha=args.alpha,
     ).to(args.device)
-    """load the optimizer, scheduler (including a warmup scheduler)"""
+
+    """加载 optimizer, scheduler (包括 warmup scheduler)"""
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma, verbose=False)
     warmup_scheduler = warmup.LinearWarmup(optimizer, args.warmup_period)
